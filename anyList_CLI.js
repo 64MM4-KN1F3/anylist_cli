@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 // Load the environment variables from the .env file
 dotenv.config();
 
-// Replace with your actual email and password
+// Pull .env vars
 const email = process.env.EMAIL;
 const password = process.env.PASSWORD;
 const sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
@@ -63,18 +63,14 @@ const addItemToList = async (listName, itemName) => {
         console.log(`Item "${itemName}" readded to "${listName}".`);
       }
       else {
-        console.log(existingItem);
         console.log(`Item "${itemName}" already exists in "${listName}".`);
       }
       return;
     }
 
-
-
     const newItem = anylist.createItem({ name: itemName });
     const addedItem = await list.addItem(newItem);
     console.log(`Item "${addedItem.name}" added to "${listName}".`);
-    console.log(addedItem);
 
     anylist.teardown();
   } catch (err) {
@@ -92,6 +88,9 @@ const main = async () => {
         shouldExit = true;
       } 
       if (itemName.toLowerCase() === 'quit') {
+        shouldExit = true;
+      }
+      if (itemName.toLowerCase() === 'q') {
         shouldExit = true;
       } else {
         await addItemToList(sharedGroceryListName, itemName);
