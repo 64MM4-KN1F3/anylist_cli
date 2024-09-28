@@ -57,13 +57,24 @@ const addItemToList = async (listName, itemName) => {
 
     const existingItem = list.getItemByName(itemName);
     if (existingItem) {
-      console.log(`Item "${itemName}" already exists in "${listName}".`);
+      if (existingItem.checked) {
+        existingItem.checked = false;
+        await existingItem.save();
+        console.log(`Item "${itemName}" readded to "${listName}".`);
+      }
+      else {
+        console.log(existingItem);
+        console.log(`Item "${itemName}" already exists in "${listName}".`);
+      }
       return;
     }
+
+
 
     const newItem = anylist.createItem({ name: itemName });
     const addedItem = await list.addItem(newItem);
     console.log(`Item "${addedItem.name}" added to "${listName}".`);
+    console.log(addedItem);
 
     anylist.teardown();
   } catch (err) {
