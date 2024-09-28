@@ -1,15 +1,58 @@
 const AnyList = require('anylist'); // https://github.com/codetheweb/anylist/blob/master/README.md
 const readline = require('readline');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 // Load the environment variables from the .env file
 dotenv.config();
 
+// Function to update .env file
+const updateEnvFile = (key, value) => {
+  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  let envConfig = fs.readFileSync(envFilePath, 'utf8');
+  const regex = new RegExp(`^${key}=.*`, 'm');
+
+  if (envConfig.match(regex)) {
+    envConfig = envConfig.replace(regex, `${key}=${value}`);
+  } else {
+    envConfig += `\n${key}=${value}`;
+  }
+
+  fs.writeFileSync(envFilePath, envConfig);
+};
+
 // Pull .env vars
-const email = process.env.EMAIL;
-const password = process.env.PASSWORD;
-const sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
-// const sharedGroceryListId = process.env.PRIMARY_LIST_ID;
+let email = process.env.EMAIL;
+let password = process.env.PASSWORD;
+let sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
+
+// Function to prompt user for input
+const promptUser = (question) => {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer);
+    });
+  });
+};
+
+// Check env variables
+const checkEnvVariables = async () => {
+  console.log('email: %s', email);
+  if (!email) {
+    email = await promptUser('Enter your email: ');
+    updateEnvFile('EMAIL', email);
+  }
+
+  if (!password) {
+    password = await promptUser('Enter your password: ');
+    updateEnvFile('PASSWORD', password);
+  }
+
+  if (!sharedGroceryListName) {
+    sharedGroceryListName = await promptUser('Enter the primary grocery list name: ');
+    updateEnvFile('PRIMARY_LIST_NAME', sharedGroceryListName);
+  }
+};
 
 
 const anylist = new AnyList({ email, password });
@@ -78,18 +121,14 @@ const addItemToList = async (listName, itemName) => {
 };
 
 const main = async () => {
+    await checkEnvVariables();
+
     let shouldExit = false;
   
     while (!shouldExit) {
       const itemName = await promptItemName();
   
-      if (itemName.toLowerCase() === 'exit') {
-        shouldExit = true;
-      } 
-      if (itemName.toLowerCase() === 'quit') {
-        shouldExit = true;
-      }
-      if (itemName.toLowerCase() === 'q') {
+      if (['exit', 'quit', 'q'].includes(itemName.toLowerCase())) {
         shouldExit = true;
       } else {
         await addItemToList(sharedGroceryListName, itemName);
