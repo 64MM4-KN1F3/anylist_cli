@@ -8,8 +8,8 @@ dotenv.config();
 // Replace with your actual email and password
 const email = process.env.EMAIL;
 const password = process.env.PASSWORD;
-const sharedGroceryListName = 'Shared Grocery List'
-const sharedGroceryListId = 'f9c5a71651c147e5814ea2068f4bf28d';
+const sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
+const sharedGroceryListId = process.env.PRIMARY_LIST_ID;
 
 
 const anylist = new AnyList({ email, password });

@@ -5,7 +5,6 @@ const any = new AnyList({email: process.env.EMAIL, password: process.env.PASSWOR
 
 any.login().then(async () => {
     var myLists = await any.getLists();
-  
-
+    
     console.log(myLists)
 });
