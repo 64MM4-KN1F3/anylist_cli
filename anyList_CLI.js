@@ -1,4 +1,4 @@
-const AnyList = require('anylist');
+const AnyList = require('anylist'); // https://github.com/codetheweb/anylist/blob/master/README.md
 const readline = require('readline');
 const dotenv = require('dotenv');
 
@@ -9,7 +9,7 @@ dotenv.config();
 const email = process.env.EMAIL;
 const password = process.env.PASSWORD;
 const sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
-const sharedGroceryListId = process.env.PRIMARY_LIST_ID;
+// const sharedGroceryListId = process.env.PRIMARY_LIST_ID;
 
 
 const anylist = new AnyList({ email, password });
@@ -48,7 +48,6 @@ const addItemToList = async (listName, itemName) => {
     await anylist.getLists();
 
     const list = anylist.getListByName(listName);
-    //const list = anylist.getListById(sharedGroceryListId);
 
     if (!list) {
       console.error(`List "${listName}", with id, "${sharedGroceryListId}" not found.`);
