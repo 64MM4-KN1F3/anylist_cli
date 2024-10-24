@@ -4,6 +4,12 @@
 This *very* basic CLI uses unpublished API endpoints discovered and wrapped as a node package by codetheweb: https://github.com/codetheweb/anylist
 
 ## Prereqs
+
+Install in the current path using:
+```shell
+git clone https://github.com/64MM4-KN1F3/anylist_cli.git
+```
+
 ### .env
 Create a .env file with the following lines:
 ```shell
