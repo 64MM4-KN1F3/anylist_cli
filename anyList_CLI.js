@@ -6,6 +6,16 @@ const fs = require('fs');
 // Load the environment variables from the .env file
 dotenv.config();
 
+// Function to ensure .env file exists and load environment variables
+const initEnvFile = () => {
+  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  if (!fs.existsSync(envFilePath)) {
+    console.log('.env file not found, creating a new one...');
+    fs.writeFileSync(envFilePath, ''); // create an empty .env file
+  }
+  dotenv.config({ path: envFilePath }); // load environment variables
+};
+
 // Function to update .env file
 const updateEnvFile = (key, value) => {
   const envFilePath = '.env'; // .env is assumed to be in the same directory
@@ -20,6 +30,9 @@ const updateEnvFile = (key, value) => {
 
   fs.writeFileSync(envFilePath, envConfig);
 };
+
+// Load the environment variables from the .env file
+initEnvFile();
 
 // Pull .env vars
 let email = process.env.EMAIL;
@@ -130,6 +143,8 @@ const main = async () => {
   
       if (['exit', 'quit', 'q'].includes(itemName.toLowerCase())) {
         shouldExit = true;
+      } else if ([''].includes(itemName.toLowerCase())){
+        // Do nothing
       } else {
         await addItemToList(sharedGroceryListName, itemName);
       }
