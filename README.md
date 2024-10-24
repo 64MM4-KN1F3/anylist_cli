@@ -6,10 +6,24 @@ This *very* basic CLI uses unpublished API endpoints discovered and wrapped as a
 ## Prereqs
 ### .env
 Create a .env file with the following lines:
-
+```shell
 EMAIL=<your_anylist_username>
-
 PASSWORD=<your_anylist_password>
+PRIMARY_LIST_NAME=<the_list_you_want_to_manage_via_CLI>
+```
 
 ### package.json
-To get dependencies, run: ```npm install```
+To get dependencies, run: 
+```shell
+% npm install
+```
+
+## Usage
+Run:
+```shell
+% node anyList_CLI.js
+```
+
+And away you go. Start adding items!
+
+To quit, type: 'q', 'quit' or 'exit'
