@@ -1,15 +1,71 @@
-const AnyList = require('anylist');
+const AnyList = require('anylist'); // https://github.com/codetheweb/anylist/blob/master/README.md
 const readline = require('readline');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 // Load the environment variables from the .env file
 dotenv.config();
 
-// Replace with your actual email and password
-const email = process.env.EMAIL;
-const password = process.env.PASSWORD;
-const sharedGroceryListName = 'Shared Grocery List'
-const sharedGroceryListId = 'f9c5a71651c147e5814ea2068f4bf28d';
+// Function to ensure .env file exists and load environment variables
+const initEnvFile = () => {
+  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  if (!fs.existsSync(envFilePath)) {
+    console.log('.env file not found, creating a new one...');
+    fs.writeFileSync(envFilePath, ''); // create an empty .env file
+  }
+  dotenv.config({ path: envFilePath }); // load environment variables
+};
+
+// Function to update .env file
+const updateEnvFile = (key, value) => {
+  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  let envConfig = fs.readFileSync(envFilePath, 'utf8');
+  const regex = new RegExp(`^${key}=.*`, 'm');
+
+  if (envConfig.match(regex)) {
+    envConfig = envConfig.replace(regex, `${key}=${value}`);
+  } else {
+    envConfig += `\n${key}=${value}`;
+  }
+
+  fs.writeFileSync(envFilePath, envConfig);
+};
+
+// Load the environment variables from the .env file
+initEnvFile();
+
+// Pull .env vars
+let email = process.env.EMAIL;
+let password = process.env.PASSWORD;
+let sharedGroceryListName = process.env.PRIMARY_LIST_NAME;
+
+// Function to prompt user for input
+const promptUser = (question) => {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer);
+    });
+  });
+};
+
+// Check env variables
+const checkEnvVariables = async () => {
+  console.log('email: %s', email);
+  if (!email) {
+    email = await promptUser('Enter your email: ');
+    updateEnvFile('EMAIL', email);
+  }
+
+  if (!password) {
+    password = await promptUser('Enter your password: ');
+    updateEnvFile('PASSWORD', password);
+  }
+
+  if (!sharedGroceryListName) {
+    sharedGroceryListName = await promptUser('Enter the primary grocery list name: ');
+    updateEnvFile('PRIMARY_LIST_NAME', sharedGroceryListName);
+  }
+};
 
 
 const anylist = new AnyList({ email, password });
@@ -48,7 +104,6 @@ const addItemToList = async (listName, itemName) => {
     await anylist.getLists();
 
     const list = anylist.getListByName(listName);
-    //const list = anylist.getListById(sharedGroceryListId);
 
     if (!list) {
       console.error(`List "${listName}", with id, "${sharedGroceryListId}" not found.`);
@@ -57,7 +112,14 @@ const addItemToList = async (listName, itemName) => {
 
     const existingItem = list.getItemByName(itemName);
     if (existingItem) {
-      console.log(`Item "${itemName}" already exists in "${listName}".`);
+      if (existingItem.checked) {
+        existingItem.checked = false;
+        await existingItem.save();
+        console.log(`Item "${itemName}" readded to "${listName}".`);
+      }
+      else {
+        console.log(`Item "${itemName}" already exists in "${listName}".`);
+      }
       return;
     }
 
@@ -72,16 +134,17 @@ const addItemToList = async (listName, itemName) => {
 };
 
 const main = async () => {
+    await checkEnvVariables();
+
     let shouldExit = false;
   
     while (!shouldExit) {
       const itemName = await promptItemName();
   
-      if (itemName.toLowerCase() === 'exit') {
+      if (['exit', 'quit', 'q'].includes(itemName.toLowerCase())) {
         shouldExit = true;
-      } 
-      if (itemName.toLowerCase() === 'quit') {
-        shouldExit = true;
+      } else if ([''].includes(itemName.toLowerCase())){
+        // Do nothing
       } else {
         await addItemToList(sharedGroceryListName, itemName);
       }
