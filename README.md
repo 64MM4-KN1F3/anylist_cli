@@ -1,7 +1,7 @@
 # Basic AnyList CLI
 
 ## Details
-This *very* basic CLI uses unpublished API endpoints discovered and wrapped as a node package by codetheweb: https://github.com/codetheweb/anylist
+This *very* basic CLI uses unpublished API endpoints discovered and wrapped as a node package by **codetheweb**: https://github.com/codetheweb/anylist
 
 ## Prereqs
 
