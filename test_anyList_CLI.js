@@ -4,21 +4,21 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 
 // Load environment variables from .test_env
-dotenv.config({ path: './.test_env' });
+dotenv.config({ path: './.test_env', override: true });
 
 // Function to ensure .env file exists and load environment variables
 const initEnvFile = () => {
-  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  const envFilePath = '.test_env'; // .test_env is assumed to be in the same directory
   if (!fs.existsSync(envFilePath)) {
-    console.log('.env file not found, creating a new one...');
-    fs.writeFileSync(envFilePath, ''); // create an empty .env file
+    console.log('.test_env file not found, creating a new one...');
+    fs.writeFileSync(envFilePath, ''); // create an empty .test_env file
   }
-  dotenv.config({ path: envFilePath }); // load environment variables
+  dotenv.config({ path: envFilePath, override: true }); // load environment variables
 };
 
 // Function to update .env file
 const updateEnvFile = (key, value) => {
-  const envFilePath = '.env'; // .env is assumed to be in the same directory
+  const envFilePath = '.test_env'; // .test_env is assumed to be in the same directory
   let envConfig = fs.readFileSync(envFilePath, 'utf8');
   const regex = new RegExp(`^${key}=.*`, 'm');
 

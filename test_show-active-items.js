@@ -1,19 +1,22 @@
-const AnyList = require('anylist');
 const dotenv = require('dotenv');
+// Load environment variables from .test_env BEFORE other imports, and override any existing ones
+dotenv.config({ path: './.test_env', override: true });
+
+// Log environment variables to confirm they are loaded from .test_env
+console.log(`DEBUG: EMAIL=${process.env.EMAIL}`);
+console.log(`DEBUG: PASSWORD=${process.env.PASSWORD ? '******' : 'NOT SET'}`); // Avoid logging actual password
+console.log(`DEBUG: PRIMARY_LIST_NAME=${process.env.PRIMARY_LIST_NAME}`);
+
+const AnyList = require('anylist');
 const fs = require('fs');
 
-
-
-// Load environment variables from .test_env
-dotenv.config({ path: './.test_env' });
-
 // Configure AnyList with credentials from environment
-const anylist = new AnyList({
-  email: process.env.EMAIL,
-  password: process.env.PASSWORD
-});
 
 async function displayActiveItems() {
+  const anylist = new AnyList({
+    email: process.env.EMAIL,
+    password: process.env.PASSWORD
+  });
   try {
     await anylist.login();
     await anylist.getLists();
@@ -23,7 +26,9 @@ async function displayActiveItems() {
 
     if (!list) {
       console.error(`List "${listName}" not found`);
-      anylist.teardown();
+      if (anylist && typeof anylist.teardown === 'function') {
+        anylist.teardown();
+      }
       process.exit(1);
     }
 
@@ -38,10 +43,14 @@ async function displayActiveItems() {
       });
     }
 
-    anylist.teardown();
+    if (anylist && typeof anylist.teardown === 'function') {
+      anylist.teardown();
+    }
   } catch (err) {
     console.error('Error:', err);
-    anylist.teardown();
+    if (anylist && typeof anylist.teardown === 'function') {
+      anylist.teardown();
+    }
     process.exit(1);
   }
 }
