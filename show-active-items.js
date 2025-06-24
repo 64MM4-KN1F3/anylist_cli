@@ -21,7 +21,7 @@ async function displayActiveItems() {
 
     if (!list) {
       console.error(`List "${listName}" not found`);
-      anylist.teardown();
+      await anylist.teardown();
       process.exit(1);
     }
 
@@ -36,10 +36,11 @@ async function displayActiveItems() {
       });
     }
 
-    anylist.teardown();
+    await anylist.teardown();
+    process.exit(0); // Ensure clean exit on success
   } catch (err) {
     console.error('Error:', err);
-    anylist.teardown();
+    await anylist.teardown();
     process.exit(1);
   }
 }

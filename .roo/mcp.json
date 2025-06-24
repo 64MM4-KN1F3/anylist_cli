@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "anylist Docs": {
+      "url": "https://gitmcp.io/codetheweb/anylist",
+      "disabled": false,
+      "autoApprove": [],
+      "alwaysAllow": [
+        "fetch_anylist_documentation",
+        "search_anylist_documentation",
+        "search_anylist_code",
+        "fetch_generic_url_content"
+      ]
+    }
+  }
+}

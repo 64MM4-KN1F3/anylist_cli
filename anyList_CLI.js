@@ -127,7 +127,7 @@ const addItemToList = async (listName, itemName) => {
     const addedItem = await list.addItem(newItem);
     console.log(`Item "${addedItem.name}" added to "${listName}".`);
 
-    anylist.teardown();
+    await anylist.teardown();
   } catch (err) {
     handleError(err);
   }
@@ -150,7 +150,7 @@ const main = async () => {
       }
     }
   
-    anylist.teardown();
+    await anylist.teardown();
     rl.close();
     process.exit(0); // Exit the script
   };
