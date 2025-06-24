@@ -1,5 +1,5 @@
 notes
 node_modules
 .env
-.test_env
 package-lock.json
+.test_env
