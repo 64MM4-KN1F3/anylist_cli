@@ -1,1 +1,2 @@
-node anyList_CLI.js
+#!/bin/bash
+node add.js "$@"

@@ -3,7 +3,11 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 
 // Load environment variables
-dotenv.config();
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.test_env' });
+} else {
+  dotenv.config();
+}
 
 // Configure AnyList with credentials from .env
 const anylist = new AnyList({

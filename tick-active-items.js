@@ -2,7 +2,11 @@ const AnyList = require('anylist');
 const dotenv = require('dotenv');
 
 // Load environment variables
-dotenv.config();
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.test_env' });
+} else {
+  dotenv.config();
+}
 
 // Configure AnyList with credentials from .env
 const anylist = new AnyList({

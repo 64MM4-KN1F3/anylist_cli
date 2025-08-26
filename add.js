@@ -4,7 +4,11 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 
 // Load the environment variables from the .env file
-dotenv.config();
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.test_env' });
+} else {
+  dotenv.config();
+}
 
 // Function to ensure .env file exists and load environment variables
 const initEnvFile = () => {
@@ -98,61 +102,78 @@ const promptItemName = () => {
   });
 };
 
-const addItemToList = async (listName, itemName) => {
-  try {
-    await anylist.login();
-    await anylist.getLists();
-
-    const list = anylist.getListByName(listName);
-
-    if (!list) {
-      console.error(`List "${listName}", with id, "${sharedGroceryListId}" not found.`);
-      return;
+const addItemToList = async (list, itemName) => {
+  const existingItem = list.getItemByName(itemName);
+  if (existingItem) {
+    if (existingItem.checked) {
+      existingItem.checked = false;
+      await existingItem.save();
+      console.log(`Item "${itemName}" readded to "${list.name}".`);
     }
-
-    const existingItem = list.getItemByName(itemName);
-    if (existingItem) {
-      if (existingItem.checked) {
-        existingItem.checked = false;
-        await existingItem.save();
-        console.log(`Item "${itemName}" readded to "${listName}".`);
-      }
-      else {
-        console.log(`Item "${itemName}" already exists in "${listName}".`);
-      }
-      return;
+    else {
+      console.log(`Item "${itemName}" already exists in "${list.name}".`);
     }
-
-    const newItem = anylist.createItem({ name: itemName });
-    const addedItem = await list.addItem(newItem);
-    console.log(`Item "${addedItem.name}" added to "${listName}".`);
-
-    await anylist.teardown();
-  } catch (err) {
-    handleError(err);
+    return;
   }
+
+  const newItem = anylist.createItem({ name: itemName });
+  const addedItem = await list.addItem(newItem);
+  console.log(`Item "${addedItem.name}" added to "${list.name}".`);
 };
 
 const main = async () => {
     await checkEnvVariables();
+    const args = process.argv.slice(2);
+    let errorOccurred = false;
 
-    let shouldExit = false;
-  
-    while (!shouldExit) {
-      const itemName = await promptItemName();
-  
-      if (['exit', 'quit', 'q'].includes(itemName.toLowerCase())) {
-        shouldExit = true;
-      } else if ([''].includes(itemName.toLowerCase())){
-        // Do nothing
-      } else {
-        await addItemToList(sharedGroceryListName, itemName);
-      }
+    try {
+        await anylist.login();
+        await anylist.getLists();
+
+        const list = anylist.getListByName(sharedGroceryListName);
+
+        if (!list) {
+            console.error(`List "${sharedGroceryListName}" not found.`);
+            errorOccurred = true;
+        } else {
+            if (args.length > 0) {
+                const hasComma = args.some(arg => arg.includes(','));
+                let itemsToAdd = [];
+
+                if (hasComma) {
+                    // Multi-item mode
+                    for (const arg of args) {
+                        const subItems = arg.split(',').map(i => i.trim().replace(/"/g, '')).filter(Boolean);
+                        itemsToAdd.push(...subItems);
+                    }
+                } else {
+                    // Single-item mode
+                    itemsToAdd.push(args.join(' '));
+                }
+
+                for (const itemName of itemsToAdd) {
+                    await addItemToList(list, itemName);
+                }
+            } else {
+                let shouldExit = false;
+                while (!shouldExit) {
+                    const itemName = await promptItemName();
+                    if (['exit', 'quit', 'q'].includes(itemName.toLowerCase())) {
+                        shouldExit = true;
+                    } else if (itemName.trim() !== ''){
+                        await addItemToList(list, itemName);
+                    }
+                }
+                rl.close();
+            }
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        errorOccurred = true;
+    } finally {
+        await anylist.teardown();
+        process.exit(errorOccurred ? 1 : 0);
     }
-  
-    await anylist.teardown();
-    rl.close();
-    process.exit(0); // Exit the script
-  };
+};
 
 main();
