@@ -30,20 +30,40 @@ async function tickActiveItems() {
     const args = process.argv.slice(2);
     if (args.length === 0 || args[0].trim() === '') {
       console.log("Usage: node tick-active-items.js <item_numbers>");
-      console.log("Example: node tick-active-items.js 1,5,12");
+      console.log("Example: node tick-active-items.js 1,5,8-12");
       await anylist.teardown(); // Ensure teardown even on usage error
       process.exit(1);
     }
 
     const itemNumbersStr = args[0];
-    const itemNumbers = itemNumbersStr.split(',').map(numStr => {
-      const num = parseInt(numStr.trim(), 10);
-      if (isNaN(num) || num <= 0) {
-        errorMessages.push(`Warning: Invalid item number "${numStr}". Numbers must be positive integers.`);
-        return null; // Mark as invalid
-      }
-      return num;
-    }).filter(num => num !== null); // Filter out invalid entries
+    const itemNumbersRaw = [];
+    const parts = itemNumbersStr.split(',');
+
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [startStr, endStr] = trimmedPart.split('-');
+            const start = parseInt(startStr, 10);
+            const end = parseInt(endStr, 10);
+
+            if (isNaN(start) || isNaN(end) || start <= 0 || end <= 0 || start > end) {
+                errorMessages.push(`Warning: Invalid item range "${trimmedPart}".`);
+                continue;
+            }
+
+            for (let i = start; i <= end; i++) {
+                itemNumbersRaw.push(i);
+            }
+        } else {
+            const num = parseInt(trimmedPart, 10);
+            if (isNaN(num) || num <= 0) {
+                errorMessages.push(`Warning: Invalid item number "${trimmedPart}".`);
+                continue;
+            }
+            itemNumbersRaw.push(num);
+        }
+    }
+    const itemNumbers = [...new Set(itemNumbersRaw)].sort((a, b) => a - b);
 
     if (itemNumbers.length === 0 && errorMessages.length > 0) {
         // Only invalid numbers were provided
