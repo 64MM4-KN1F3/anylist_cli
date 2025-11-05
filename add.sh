@@ -1,2 +1,2 @@
 #!/bin/bash
-node add.js "$@"
+node ./js/add.js "$@"

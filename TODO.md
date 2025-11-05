@@ -1,0 +1,2 @@
+[ ] Fix or descope the following issue:
+  `./add.sh "grated cheese" "nuts" "bananas" "oranges" "apples"` adds a single item "grated cheese nuts bananas oranges apples" rather than separate items. If commas are included it works.

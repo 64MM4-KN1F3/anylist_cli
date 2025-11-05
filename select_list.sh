@@ -1,1 +1,1 @@
-node select-view-list.js
+node ./js/select-view-list.js

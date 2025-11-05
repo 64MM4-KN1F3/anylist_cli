@@ -1,1 +1,1 @@
-node tick-active-items.js "$@"
+node ./js/tick-active-items.js "$@"
