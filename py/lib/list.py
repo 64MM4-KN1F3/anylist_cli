@@ -1,4 +1,4 @@
-from lib.py.item import Item
+from .item import Item
 
 class List:
     def __init__(self, list_data, client=None, protobuf=None, uid=None):
@@ -23,8 +23,12 @@ class List:
 
         item.list_id = self.identifier
 
-        # This is a placeholder for the actual add_item implementation
         self.items.append(item)
+
+        # In a real implementation, this would send a request to the AnyList API
+        # to add the item to the list. For now, we'll just return the item.
+        # Example:
+        # await self.client.post(f'/lists/{self.identifier}/items', data=item.to_json())
         return item
 
     async def uncheck_all(self):

@@ -1,4 +1,4 @@
-from lib.py.uuid import uuid_v4
+from .uuid import uuid_v4
 
 OP_MAPPING = {
     'name': 'set-list-item-name',

@@ -5,9 +5,9 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 import httpx
-from lib.py import anylist_pb2
+from . import anylist_pb2
 
-from lib.py.uuid import uuid_v4
+from .uuid import uuid_v4
 
 CREDENTIALS_KEY_CLIENT_ID = 'clientId'
 CREDENTIALS_KEY_ACCESS_TOKEN = 'accessToken'
@@ -145,8 +145,8 @@ class AnyList:
         pass
 
     async def get_lists(self, refresh_cache=True):
-        from lib.py.list import List
-        from lib.py.item import Item
+        from .list import List
+        from .item import Item
 
         decoded = await self._get_user_data(refresh_cache)
 
@@ -163,9 +163,9 @@ class AnyList:
         return self.lists
 
     async def get_meal_planning_calendar_events(self, refresh_cache=True):
-        from lib.py.meal_planning_calendar_event import MealPlanningCalendarEvent
-        from lib.py.meal_planning_calendar_label import MealPlanningCalendarEventLabel
-        from lib.py.recipe import Recipe
+        from .meal_planning_calendar_event import MealPlanningCalendarEvent
+        from .meal_planning_calendar_label import MealPlanningCalendarEventLabel
+        from .recipe import Recipe
 
         decoded = await self._get_user_data(refresh_cache)
 
@@ -182,7 +182,7 @@ class AnyList:
         return self.meal_planning_calendar_events
 
     async def get_recipes(self, refresh_cache=True):
-        from lib.py.recipe import Recipe
+        from .recipe import Recipe
 
         decoded = await self._get_user_data(refresh_cache)
 
@@ -202,3 +202,10 @@ class AnyList:
             self.calendar_id = self._user_data.mealPlanningCalendarResponse.calendarId
 
         return self._user_data
+
+    def create_item(self, item_data):
+        from .item import Item
+        return Item(item_data, client=self.client, protobuf=self.protobuf, uid=self.client_id)
+
+    def get_list_by_name(self, name):
+        return next((l for l in self.lists if l.name == name), None)
