@@ -142,6 +142,48 @@ class Item:
         self._manual_sort_index = i
         self._fields_to_update.append('manualSortIndex')
 
+    def _encode(self):
+        return self._protobuf.ListItem(
+            identifier=self._identifier,
+            listId=self._list_id,
+            name=self._name,
+            quantity=self._quantity,
+            details=self._details,
+            checked=self._checked,
+            userId=self._user_id,
+            categoryMatchId=self._category_match_id,
+            manualSortIndex=self._manual_sort_index
+        )
+
     async def save(self, is_favorite=False):
-        # This is a placeholder for the actual save implementation
-        pass
+        ops = []
+        for field in self._fields_to_update:
+            value = getattr(self, field)
+            op_name = OP_MAPPING[field]
+
+            op = self._protobuf.PBListOperation()
+            op.metadata.operationId = uuid_v4()
+            op.metadata.handlerId = op_name
+            op.metadata.userId = self._uid
+
+            op.listId = self._list_id
+            op.listItemId = self._identifier
+
+            if isinstance(value, bool):
+                op.updatedValue = 'y' if value else 'n'
+            else:
+                op.updatedValue = str(value)
+
+            ops.append(op)
+
+        op_list = self._protobuf.PBListOperationList()
+        op_list.operations.extend(ops)
+
+        headers = {
+            'X-AnyLeaf-Client-Identifier': self._client.client_id,
+            'Authorization': f'Bearer {self._client.access_token}'
+        }
+
+        url = 'data/starter-lists/update' if is_favorite else 'data/shopping-lists/update'
+        await self._client.post(url, headers=headers, content=op_list.SerializeToString())
+        self._fields_to_update = []

@@ -59,3 +59,11 @@ class Ingredient:
     def note(self, n):
         self._note = n
         self._fields_to_update.append('note')
+
+    def _encode(self):
+        return self._protobuf.PBIngredient(
+            name=self._name,
+            quantity=self._quantity,
+            rawIngredient=self._raw_ingredient,
+            note=self._note
+        )

@@ -18,17 +18,34 @@ class List:
         self.uid = uid
 
     async def add_item(self, item, is_favorite=False):
+        from .uuid import uuid_v4
+
         if not isinstance(item, Item):
             raise TypeError('Must be an instance of the Item class.')
 
         item.list_id = self.identifier
 
-        self.items.append(item)
+        op = self.protobuf.PBListOperation()
+        op.metadata.operationId = uuid_v4()
+        op.metadata.handlerId = 'add-item' if is_favorite else 'add-shopping-list-item'
+        op.metadata.userId = self.uid
 
-        # In a real implementation, this would send a request to the AnyList API
-        # to add the item to the list. For now, we'll just return the item.
-        # Example:
-        # await self.client.post(f'/lists/{self.identifier}/items', data=item.to_json())
+        op.listId = self.identifier
+        op.listItemId = item.identifier
+        op.listItem.CopyFrom(item._encode())
+
+        op_list = self.protobuf.PBListOperationList()
+        op_list.operations.extend([op])
+
+        headers = {
+            'X-AnyLeaf-Client-Identifier': self.client.client_id,
+            'Authorization': f'Bearer {self.client.access_token}'
+        }
+
+        url = 'data/starter-lists/update' if is_favorite else 'data/shopping-lists/update'
+        await self.client.post(url, headers=headers, content=op_list.SerializeToString())
+
+        self.items.append(item)
         return item
 
     async def uncheck_all(self):
@@ -36,7 +53,28 @@ class List:
         pass
 
     async def remove_item(self, item, is_favorite=False):
-        # This is a placeholder for the actual remove_item implementation
+        from .uuid import uuid_v4
+
+        op = self.protobuf.PBListOperation()
+        op.metadata.operationId = uuid_v4()
+        op.metadata.handlerId = 'remove-item' if is_favorite else 'remove-shopping-list-item'
+        op.metadata.userId = self.uid
+
+        op.listId = self.identifier
+        op.listItemId = item.identifier
+        op.listItem.CopyFrom(item._encode())
+
+        op_list = self.protobuf.PBListOperationList()
+        op_list.operations.extend([op])
+
+        headers = {
+            'X-AnyLeaf-Client-Identifier': self.client.client_id,
+            'Authorization': f'Bearer {self.client.access_token}'
+        }
+
+        url = 'data/starter-lists/update' if is_favorite else 'data/shopping-lists/update'
+        await self.client.post(url, headers=headers, content=op_list.SerializeToString())
+
         self.items = [i for i in self.items if i.identifier != item.identifier]
 
     def get_item_by_id(self, identifier):

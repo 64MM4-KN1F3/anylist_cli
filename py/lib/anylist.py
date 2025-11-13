@@ -202,10 +202,3 @@ class AnyList:
             self.calendar_id = self._user_data.mealPlanningCalendarResponse.calendarId
 
         return self._user_data
-
-    def create_item(self, item_data):
-        from .item import Item
-        return Item(item_data, client=self.client, protobuf=self.protobuf, uid=self.client_id)
-
-    def get_list_by_name(self, name):
-        return next((l for l in self.lists if l.name == name), None)
